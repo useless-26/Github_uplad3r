@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZIPUSH - GitHub Deployer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:       #060811;
+      --bg2:      #0c1020;
+      --bg3:      #111828;
+      --cyan:     #00f5ff;
+      --pink:     #ff2d78;
+      --green:    #0dff8c;
+      --amber:    #ffb830;
+      --purple:   #b44dff;
+      --border:   rgba(255,255,255,0.06);
+      --text:     #c8d4f0;
+      --muted:    #4a5578;
+      --mono:     'JetBrains Mono', monospace;
+      --display:  'Syne', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: #1e2840; border-radius: 2px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--cyan);   top: -150px; left: -150px; }
+    .blob-2 { width: 400px; height: 400px; background: var(--pink);   bottom: -100px; right: -100px; }
+    .blob-3 { width: 300px; height: 300px; background: var(--purple); top: 40%;  left: 50%; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.08); }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    .logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 30px rgba(0,245,255,0.4);
+    }
+    .logo-text {
+      font-family: var(--display);
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--cyan), var(--pink), var(--amber));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.04em;
+    }
+    .tagline {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.6s ease both;
+      backdrop-filter: blur(2px);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(0,245,255,0.2), transparent, rgba(255,45,120,0.15));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0,245,255,0.3), transparent);
+    }
+
+    .input-row { display: flex; gap: 10px; }
+    input[type="text"], input[type="password"], select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 11px 14px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: rgba(0,245,255,0.4);
+      box-shadow: 0 0 0 3px rgba(0,245,255,0.08);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 11px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      letter-spacing: 0.06em;
+      transition: all 0.18s;
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,245,255,0.08));
+      border: 1px solid rgba(0,245,255,0.35);
+      color: var(--cyan);
+    }
+    .btn-cyan:hover:not(:disabled) {
+      box-shadow: 0 0 30px rgba(0,245,255,0.25);
+    }
+    .btn-push {
+      width: 100%;
+      padding: 15px;
+      font-size: 14px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+      color: #000;
+      box-shadow: 0 4px 30px rgba(0,245,255,0.3);
+      letter-spacing: 0.1em;
+    }
+    .btn-push:hover:not(:disabled) {
+      box-shadow: 0 6px 40px rgba(0,245,255,0.5);
+      transform: translateY(-1px);
+    }
+    .btn-push:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+    .tab {
+      flex: 1;
+      padding: 9px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.18s;
+    }
+    .tab.active {
+      background: rgba(0,245,255,0.1);
+      border-color: rgba(0,245,255,0.4);
+      color: var(--cyan);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(13,255,140,0.06);
+      border: 1px solid rgba(13,255,140,0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 12px;
+    }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(13,255,140,0.4); }
+    .user-name { font-size: 13px; color: var(--green); font-weight: 600; }
+    .user-repos { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .toggle {
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      position: relative;
+      transition: background 0.2s;
+    }
+    .toggle.on { background: rgba(0,245,255,0.25); border-color: var(--cyan); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform 0.2s;
+    }
+    .toggle.on::after { transform: translateX(16px); background: var(--cyan); }
+
+    .drop-zone {
+      border: 2px dashed rgba(0,245,255,0.2);
+      border-radius: 14px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg3);
+    }
+    .drop-zone:hover, .drop-zone.over { border-color: rgba(0,245,255,0.6); background: rgba(0,245,255,0.04); }
+    .drop-icon { font-size: 32px; margin-bottom: 10px; }
+    .drop-file {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg3);
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+    .drop-remove { color: var(--pink); cursor: pointer; font-size: 12px; }
+
+    .log-box {
+      background: #040608;
+      border: 1px solid rgba(0,245,255,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 260px;
+      overflow-y: auto;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+    .log-line {
+      display: flex;
+      gap: 8px;
+      line-height: 1.6;
+      font-family: var(--mono);
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      padding: 4px 0;
+    }
+    .log-info .log-dot { color: var(--cyan); }
+    .log-success .log-dot { color: var(--green); }
+    .log-error .log-dot { color: var(--pink); }
+    .log-done .log-dot { color: var(--amber); }
+    .log-warn .log-dot { color: var(--amber); }
+    .log-dot { font-weight: bold; width: 20px; }
+
+    .done-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(13,255,140,0.06);
+      border: 1px solid rgba(13,255,140,0.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-top: 12px;
+    }
+    .done-link { color: var(--green); text-decoration: none; border-bottom: 1px solid rgba(13,255,140,0.4); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 480px) {
+      .logo-text { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo"><div class="logo-icon">⬡</div><span class="logo-text">ZIPUSH</span></div>
+      <div class="tagline">Upload ZIP · Deploy to GitHub · Preserves Folders</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">GitHub Access Token</div>
+      <div class="input-row">
+        <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+        <button class="btn btn-cyan" id="connect-btn" onclick="connectGitHub()">Connect</button>
+      </div>
+      <div id="user-badge" style="display:none" class="user-badge">
+        <img class="avatar" id="avatar" /><span class="user-name" id="user-name"></span>
+        <span class="user-repos" id="user-repos"></span>
+      </div>
+    </div>
+
+    <div class="card" id="card-repo" style="display:none">
+      <div class="card-label">Target Repository</div>
+      <div class="tabs">
+        <button class="tab active" id="tab-existing" onclick="setMode('existing')">Existing Repo</button>
+        <button class="tab" id="tab-new" onclick="setMode('new')">Create New Repo</button>
+      </div>
+      <div id="mode-existing"><select id="repo-select"></select></div>
+      <div id="mode-new" style="display:none">
+        <input type="text" id="new-repo-input" placeholder="my-awesome-repo" />
+        <label class="toggle-row" onclick="togglePrivate()">
+          <span>Private repository</span>
+          <div class="toggle" id="private-toggle"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="card" id="card-files" style="display:none">
+      <div class="card-label">ZIP File to Deploy</div>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('zip-input').click()"
+        ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <div class="drop-icon">📦</div>
+        <div class="drop-text">Drop your <strong style="color:var(--cyan)">.zip</strong> here</div>
+        <div class="drop-hint">Preserves all folders and subfolders</div>
+      </div>
+      <div id="drop-file-info" style="display:none">
+        <div class="drop-file"><span id="drop-file-name"></span><span class="drop-remove" onclick="clearZip()">✕ Remove</span></div>
+      </div>
+      <input type="file" id="zip-input" accept=".zip" style="display:none" onchange="onFileSelect(event)" />
+    </div>
+
+    <button class="btn btn-push" id="push-btn" style="display:none" onclick="pushToGitHub()">PUSH TO GITHUB</button>
+    <div id="log-box" class="log-box" style="display:none"></div>
+    <div id="done-banner" class="done-banner" style="display:none">
+      <span>🚀</span><div><div class="done-text">Successfully deployed!</div><a class="done-link" id="repo-link" href="#" target="_blank"></a></div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5000';
+    let userData = null, reposData = [], mode = 'existing', isPrivate = false;
+    let zipFile = null, pushing = false;
+
+    async function connectGitHub() {
+      const token = document.getElementById('token-input').value.trim();
+      if (!token) return;
+      const btn = document.getElementById('connect-btn');
+      btn.textContent = '...'; btn.disabled = true;
+      try {
+        const res = await fetch(`${API}/api/connect`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'Connection failed'); return; }
+        userData = data.user; reposData = data.repos;
+        document.getElementById('avatar').src = userData.avatar_url;
+        document.getElementById('user-name').textContent = '@' + userData.login;
+        document.getElementById('user-repos').textContent = reposData.length + ' repos';
+        document.getElementById('user-badge').style.display = 'flex';
+        const sel = document.getElementById('repo-select');
+        sel.innerHTML = reposData.map(r => `<option value="${r.name}">${r.name}${r.private ? ' 🔒' : ''}</option>`).join('');
+        document.getElementById('card-repo').style.display = 'block';
+        document.getElementById('card-files').style.display = 'block';
+        document.getElementById('push-btn').style.display = 'block';
+        btn.textContent = 'Connected';
+      } catch (e) { alert('Connection error: ' + e.message); btn.textContent = 'Connect'; btn.disabled = false; }
+    }
+
+    function setMode(m) { mode = m; document.getElementById('tab-existing').classList.toggle('active', m === 'existing'); document.getElementById('tab-new').classList.toggle('active', m === 'new'); document.getElementById('mode-existing').style.display = m === 'existing' ? 'block' : 'none'; document.getElementById('mode-new').style.display = m === 'new' ? 'block' : 'none'; }
+    function togglePrivate() { isPrivate = !isPrivate; document.getElementById('private-toggle').classList.toggle('on', isPrivate); }
+    
+    function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('over'); }
+    function onDragLeave() { document.getElementById('drop-zone').classList.remove('over'); }
+    function onDrop(e) { e.preventDefault(); onDragLeave(); const f = e.dataTransfer.files[0]; if (f && f.name.endsWith('.zip')) setZip(f); else alert('Only .zip files allowed'); }
+    function onFileSelect(e) { if (e.target.files[0]) setZip(e.target.files[0]); }
+
+    function setZip(f) { zipFile = f; document.getElementById('drop-zone').style.display = 'none'; document.getElementById('drop-file-info').style.display = 'block'; document.getElementById('drop-file-name').innerHTML = `📦 <strong>${f.name}</strong> <span style="color:var(--muted)">(${(f.size/1024).toFixed(1)} KB)</span>`; }
+    function clearZip() { zipFile = null; document.getElementById('zip-input').value = ''; document.getElementById('drop-zone').style.display = 'block'; document.getElementById('drop-file-info').style.display = 'none'; }
+
+    function addLog(type, text) {
+      const icons = { info:'›', success:'✓', error:'✗', done:'★', warn:'⚠' };
+      const logBox = document.getElementById('log-box');
+      if (logBox.style.display === 'none') logBox.style.display = 'block';
+      const line = document.createElement('div');
+      line.className = `log-line log-${type}`;
+      line.innerHTML = `<span class="log-dot">${icons[type] || '·'}</span><span>${text}</span>`;
+      logBox.appendChild(line);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    async function pushToGitHub() {
+      if (pushing) return;
+      const token = document.getElementById('token-input').value.trim();
+      if (!token) { alert('Please connect first'); return; }
+      let repoName = mode === 'existing' ? document.getElementById('repo-select').value : document.getElementById('new-repo-input').value.trim();
+      if (!repoName) { alert('Enter a repository name'); return; }
+      if (!zipFile) { alert('Select a ZIP file to upload'); return; }
+      pushing = true;
+      const btn = document.getElementById('push-btn');
+      btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #000;border-top-color:transparent;animation:spin 0.6s linear infinite;margin-right:8px;"></span> PUSHING...'; btn.disabled = true;
+      const logBox = document.getElementById('log-box'); logBox.innerHTML = ''; logBox.style.display = 'block';
+      document.getElementById('done-banner').style.display = 'none';
+      addLog('info', 'Starting deployment...');
+      
+      const fd = new FormData();
+      fd.append('token', token);
+      fd.append('mode', mode);
+      fd.append('repo_name', repoName);
+      fd.append('private', isPrivate);
+      fd.append('zip_file', zipFile);
+      
+      try {
+        const res = await fetch(`${API}/api/push`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) { addLog('error', data.error || 'Push failed'); return; }
+        if (data.logs) data.logs.forEach(l => addLog(l.type, l.text));
+        if (data.repo_url) {
+          document.getElementById('repo-link').href = data.repo_url;
+          document.getElementById('repo-link').textContent = data.repo_url;
+          document.getElementById('done-banner').style.display = 'flex';
+        }
+        if (data.total_files) addLog('done', `Pushed ${data.total_files} file(s) with folder structure`);
+      } catch (e) { addLog('error', 'Network error: ' + e.message); }
+      finally { pushing = false; btn.innerHTML = 'PUSH TO GITHUB'; btn.disabled = false; }
+    }
+    document.getElementById('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') connectGitHub(); });
+  </script>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>
